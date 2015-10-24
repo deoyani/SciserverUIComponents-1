@@ -1,15 +1,21 @@
 /* 
- * from reply by Andy VanWagoner on
- *  http://stackoverflow.com/questions/1293147/javascript-code-to-parse-csv-data
+ * CSV parser obtained from reply by Andy VanWagoner on
+ * http://stackoverflow.com/questions/1293147/javascript-code-to-parse-csv-data
+ * Modified a bit.
  */
 var Tables = {
-parseCSV: function(csv, reviver) {
+parseCSV: function(csv, table, reviver) {
     reviver = reviver || function(r, c, v) { return v; };
-    var chars = csv.split(''), c = 0, cc = chars.length, start, end, table = [], row;
+    var chars = csv.split(''), c = 0, cc = chars.length, start, end,  row;
     var i=0
     while (c < cc) {
     	row = []
-    	table.push(row)
+    	if(i == 0){
+    		table.header=row
+    	} else {
+    		table.data.push(row)
+    	} 
+    	i=i+1
         while (c < cc && '\r' !== chars[c] && '\n' !== chars[c]) {
             start = end = c;
             if ('"' === chars[c]){
@@ -34,8 +40,9 @@ parseCSV: function(csv, reviver) {
     }
     return table;
 },
-
-stringify: function(table, replacer) {
+/* _table is a json object with header and data as produced by parseCSV */
+stringify: function(_table, replacer) {
+	var table = _table.data
     replacer = replacer || function(r, c, v) { return v; };
     var csv = '', c, cc, r, rr = table.length, cell;
     for (r = 0; r < rr; ++r) {
@@ -50,58 +57,41 @@ stringify: function(table, replacer) {
     return csv;
 },
 writeTable: function(csv, targetdiv) {
-	var data = Tables.parseCSV(csv);
-	var tbl=Tables.tableStart() ;
-	tbl = Tables.addTableHeader(data,tbl)
-	tbl+="<tbody>"
-	tbl = Tables.addTableContent(data, tbl);
-	tbl+="</tbody></table>"
-	var dtbl = $(tbl)
-	$(targetdiv).append(dtbl)
-	dtbl.DataTable( );			
+	var table = Tables.parseCSV(csv);
+	var dtbl=Tables.startTable(targetdiv,table.header) ;
+	dtbl.DataTable( {columns:table.header,data:table.data});			
 },
-
+/*
+ * Create a single table holding results from >=1 queries to same tables in different databases
+ */
 writeTables : function(csvs, targetdiv) {
-	var tbl=Tables.tableStart() ;
+	var table = {}
+	table.data=[]
+	table.header=null
 	for(var i = 0; i < csvs.length; i++){
-		var data = Tables.parseCSV(csvs[i]);
-		if(i == 0){
-			tbl = Tables.addTableHeader(data,tbl)
-	  	tbl+="<tbody style=\"font-family:Lucida Console\">"
-		}
-		tbl = Tables.addTableContent(data, tbl);
+		Tables.parseCSV(csvs[i], table);
 	}	
-	tbl+="</tbody></table>"
+	if(table.data == null || table.data.length == 0) {
+		$(targetdiv).html("0 rows returned")			
+	} else {
+		var dtbl=Tables.startTable(targetdiv,table.header) ;
+		dtbl.DataTable( {"data":table.data});			
+	}
+},
+/* 
+ * create a <table> element with a header for the column names, simplest way to 
+ * create an element to which DataTables() can be applied
+ */
+startTable : function(targetdiv,header){
+	var tbl= "<table class=\"table table-striped table-bordered nowrap\"><thead><tr>"
+	for(icol = 0; icol< header.length; icol++) {
+					tbl+="<th>"+header[icol]+"</th>"
+				}
+	tbl+="</tr></thead><tbody/></table>"
 	var dtbl = $(tbl)
 	$(targetdiv).append(dtbl)
-	dtbl.DataTable( );			
-},
-
-
-addTableHeader : function (data, tbl){
-	  tbl+="<thead><tr>"
-		for(icol = 0; icol< data[0].length; icol++) {
-			tbl+="<th>"+data[0][icol]+"</th>"
-		}
-		tbl+="</tr></thead>"
-		return tbl;
-},
-
-addTableContent : function(data, tbl){
-	for(irow = 1; irow<data.length; irow++){
-		tbl+="<tr >"
-		for(icol=0; icol < data[irow].length; icol++) {
-			tbl+="<td >"+Tables.renderColumn(data[irow][icol])+"</td>"
-		}
-		tbl+="</tr>"
-	}
-	return tbl;
-},
-renderColumn : function(data){
-	return data.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') ;
-},
-tableStart : function(){
-	return "<table class=\"table table-striped table-bordered nowrap\">"
+	return dtbl 
 }
+
 
 };
