@@ -4,6 +4,10 @@
  * Modified a bit.
  */
 var Tables = {
+		format_datatable:["html","Inline DataTable"],
+		format_csv: ["csv","Inline CSV"],
+		format_csvfile:["csvfile","CSV File"],
+			
 parseCSV: function(csv, table, reviver) {
     reviver = reviver || function(r, c, v) { return v; };
     var chars = csv.split(''), c = 0, cc = chars.length, start, end,  row;
@@ -56,27 +60,32 @@ stringify: function(_table, replacer) {
     }
     return csv;
 },
-writeTable: function(csv, targetdiv) {
-	var table = Tables.parseCSV(csv);
-	var dtbl=Tables.startTable(targetdiv,table.header) ;
-	dtbl.DataTable( {columns:table.header,data:table.data});			
+writeTable: function(csv, targetdiv, format) {
+	var table = {data:[],header:null}
+	if(format==Tables.format_csv[0]){
+		Tables.writeCSV(targetdiv,csv)
+	} else if(format == Tables.format_datatable[0]){
+		var table = Tables.parseCSV(csv, table);
+		Tables.writeDataTable(targetdiv, table);
+	}else if(format == Tables.format_csvfile[0]){
+		Tables.writeLink(targetdiv,csv);
+	}
 },
-/*
- * Create a single table holding results from >=1 queries to same tables in different databases
- */
-writeTables : function(csvs, targetdiv) {
-	var table = {}
-	table.data=[]
-	table.header=null
-	for(var i = 0; i < csvs.length; i++){
-		Tables.parseCSV(csvs[i], table);
-	}	
+writeCSV : function(targetdiv, csv){
+	var newdiv=$('<textarea cols="120" rows="20" style="white-space:nowrap;overflow:auto;font-family:Courier New,monospace;"></textarea>');
+	newdiv.append(csv);
+	$(targetdiv).append(newdiv);
+},
+writeDataTable : function(targetdiv, table){
 	if(table.data == null || table.data.length == 0) {
 		$(targetdiv).html("0 rows returned")			
 	} else {
 		var dtbl=Tables.startTable(targetdiv,table.header) ;
 		dtbl.DataTable( {"data":table.data});			
 	}
+},
+writeLink : function(targetdiv, link){
+	$(targetdiv).append('<a href="'+link+'">'+link+'</a><br/>');
 },
 /* 
  * create a <table> element with a header for the column names, simplest way to 
