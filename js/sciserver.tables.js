@@ -3,6 +3,36 @@
  *  http://stackoverflow.com/questions/1293147/javascript-code-to-parse-csv-data
  */
 var Tables = {
+	/// Write JSON Table in html
+	/// Added by @Deoyani Nandrekar-Heinis
+	/// Pass JSON object to make html table with given style and container 
+	writeJSONTable : function(data,targetdiv, tblclass){
+		var tbl=$("<table"+tblclass+"></table>") ;
+		targetdiv.append(tbl);
+		$.each(data,function(key, arr){
+			if(key == 0){ 
+				var trhead = $("<thead><tr/></thead>");
+				tbl.append(trhead);
+				$.each(arr, function(k,v){
+				    trhead.append($("<th>" + k + "</th>"))
+				});
+				var firstRow = $("<tr/>");
+				tbl.append(firstRow);
+				$.each(arr, function(k,v){
+				    firstRow.append($("<td>" + v + "</td>"))
+				});
+			}else{
+				var tr = $("<tr/>");
+				tbl.append(tr);
+				$.each(arr, function(k,v){
+					tr.append($("<td>" + v + "</td>"))
+			     });
+			 }
+		});			
+	},		
+
+		
+//// Extra needed if send CSV data		
 parseCSV: function(csv, reviver) {
     reviver = reviver || function(r, c, v) { return v; };
     var chars = csv.split(''), c = 0, cc = chars.length, start, end, table = [], row;
@@ -79,11 +109,13 @@ writeTables : function(csvs, targetdiv) {
 
 
 addTableHeader : function (data, tbl){
+	
 	  tbl+="<thead><tr>"
 		for(icol = 0; icol< data[0].length; icol++) {
 			tbl+="<th>"+data[0][icol]+"</th>"
 		}
 		tbl+="</tr></thead>"
+			
 		return tbl;
 },
 
