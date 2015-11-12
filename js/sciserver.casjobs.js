@@ -7,9 +7,10 @@ var CasJobs = {
 			type : "POST",
 			url : CasJobs.endpoint + "/RestApi/contexts/" + context + "/query",
 			contentType : "application/json",
-			accept : "application/json",
+			
 			headers : {
-				"X-Auth-Token" : token
+				"X-Auth-Token" : token,
+				"accept" : "application/json+array"	
 			},
 			dataType : returntype,
 			data : JSON.stringify({
