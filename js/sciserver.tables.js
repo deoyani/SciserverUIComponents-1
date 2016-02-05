@@ -8,9 +8,8 @@ var Tables = {
 		targetdiv.append(tbl);
 		tbl.DataTable( {
 	        data: data,
-	        columns: columnsData
-	        
-	    } );
+	        aoColumns:columnsData
+	       } );
 	
 	}
 };

@@ -15,7 +15,8 @@ var CasJobs = {
 			dataType : returntype,
 			data : JSON.stringify({
 				Query : sql,
-				Archive : archive
+				Archive : archive,
+				BlobUrl: true
 			}),
 			complete : function(data) {
 				callback(data)
