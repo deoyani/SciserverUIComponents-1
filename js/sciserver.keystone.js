@@ -1,5 +1,3 @@
-
-///test
 var Keystone = {
 	endpoint : "http://scitest02.pha.jhu.edu/login-portal/keystone/v3/tokens",	
 	credentials : {},
@@ -13,13 +11,14 @@ var Keystone = {
 		}
 	},
 	/** 
-	 * Read the rivate token obtained using explicit login.
+	 * Read the private token obtained using explicit login.
 	 * Could/should check a cookie. Maybe set one? 
 	 */
 	read_token : function() {
 		var token = decodeURIComponent((new RegExp('[?|&]token='
 				+ '([^&;]+?)(&|#|;|$)').exec(location.search) || [ , "" ])[1]
 				.replace(/\+/g, '%20')) || null
+				
 		return token;		
 	},
 	validate_token : function(token) {
